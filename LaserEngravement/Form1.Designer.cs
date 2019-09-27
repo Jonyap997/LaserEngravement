@@ -37,6 +37,7 @@
             this.btnEngrave = new System.Windows.Forms.Button();
             this.btnExit = new System.Windows.Forms.Button();
             this.btnEmergency = new System.Windows.Forms.Button();
+            this.lblNotice = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.picSampleImage)).BeginInit();
             this.SuspendLayout();
             // 
@@ -99,7 +100,7 @@
             // 
             this.picSampleImage.Location = new System.Drawing.Point(169, 199);
             this.picSampleImage.Name = "picSampleImage";
-            this.picSampleImage.Size = new System.Drawing.Size(200, 100);
+            this.picSampleImage.Size = new System.Drawing.Size(275, 125);
             this.picSampleImage.TabIndex = 5;
             this.picSampleImage.TabStop = false;
             // 
@@ -109,7 +110,7 @@
             this.btnEngrave.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Gray;
             this.btnEngrave.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnEngrave.Font = new System.Drawing.Font("Arial Narrow", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnEngrave.Location = new System.Drawing.Point(166, 337);
+            this.btnEngrave.Location = new System.Drawing.Point(166, 371);
             this.btnEngrave.Name = "btnEngrave";
             this.btnEngrave.Size = new System.Drawing.Size(80, 35);
             this.btnEngrave.TabIndex = 6;
@@ -123,7 +124,7 @@
             this.btnExit.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Gray;
             this.btnExit.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnExit.Font = new System.Drawing.Font("Arial Narrow", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnExit.Location = new System.Drawing.Point(166, 389);
+            this.btnExit.Location = new System.Drawing.Point(166, 423);
             this.btnExit.Name = "btnExit";
             this.btnExit.Size = new System.Drawing.Size(80, 35);
             this.btnExit.TabIndex = 7;
@@ -139,19 +140,31 @@
             this.btnEmergency.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnEmergency.Font = new System.Drawing.Font("Arial Narrow", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnEmergency.ForeColor = System.Drawing.Color.FloralWhite;
-            this.btnEmergency.Location = new System.Drawing.Point(259, 337);
+            this.btnEmergency.Location = new System.Drawing.Point(259, 371);
             this.btnEmergency.Name = "btnEmergency";
             this.btnEmergency.Size = new System.Drawing.Size(110, 87);
             this.btnEmergency.TabIndex = 8;
             this.btnEmergency.Text = "Emergency Kill Switch";
             this.btnEmergency.UseVisualStyleBackColor = false;
             // 
+            // lblNotice
+            // 
+            this.lblNotice.AutoSize = true;
+            this.lblNotice.Font = new System.Drawing.Font("Arial Narrow", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblNotice.Location = new System.Drawing.Point(165, 336);
+            this.lblNotice.Name = "lblNotice";
+            this.lblNotice.Size = new System.Drawing.Size(186, 20);
+            this.lblNotice.TabIndex = 9;
+            this.lblNotice.Text = "Note: Image will be in grey scale";
+            this.lblNotice.Click += new System.EventHandler(this.label2_Click_1);
+            // 
             // LaserEngravementProgram
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlLightLight;
-            this.ClientSize = new System.Drawing.Size(582, 453);
+            this.ClientSize = new System.Drawing.Size(582, 466);
+            this.Controls.Add(this.lblNotice);
             this.Controls.Add(this.btnEmergency);
             this.Controls.Add(this.btnExit);
             this.Controls.Add(this.btnEngrave);
@@ -161,8 +174,11 @@
             this.Controls.Add(this.txtUploadImage);
             this.Controls.Add(this.lblUploadImage);
             this.Controls.Add(this.label1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
+            this.MaximizeBox = false;
             this.Name = "LaserEngravementProgram";
             this.Text = "Laser Engravement Program";
+            this.Load += new System.EventHandler(this.LaserEngravementProgram_Load);
             ((System.ComponentModel.ISupportInitialize)(this.picSampleImage)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -180,6 +196,7 @@
         private System.Windows.Forms.Button btnEngrave;
         private System.Windows.Forms.Button btnExit;
         private System.Windows.Forms.Button btnEmergency;
+        private System.Windows.Forms.Label lblNotice;
     }
 }
 
