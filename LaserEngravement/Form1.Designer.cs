@@ -28,11 +28,11 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.label1 = new System.Windows.Forms.Label();
+            this.lblTitle = new System.Windows.Forms.Label();
             this.lblUploadImage = new System.Windows.Forms.Label();
             this.btnUploadImage = new System.Windows.Forms.Button();
             this.txtUploadImage = new System.Windows.Forms.TextBox();
-            this.lbl = new System.Windows.Forms.Label();
+            this.lblSampleImage = new System.Windows.Forms.Label();
             this.picSampleImage = new System.Windows.Forms.PictureBox();
             this.btnEngrave = new System.Windows.Forms.Button();
             this.btnExit = new System.Windows.Forms.Button();
@@ -41,17 +41,17 @@
             ((System.ComponentModel.ISupportInitialize)(this.picSampleImage)).BeginInit();
             this.SuspendLayout();
             // 
-            // label1
+            // lblTitle
             // 
-            this.label1.AutoSize = true;
-            this.label1.BackColor = System.Drawing.SystemColors.ControlLightLight;
-            this.label1.Font = new System.Drawing.Font("Arial Narrow", 24F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.label1.Location = new System.Drawing.Point(43, 23);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(461, 46);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "Laser engravement program";
+            this.lblTitle.AutoSize = true;
+            this.lblTitle.BackColor = System.Drawing.SystemColors.ControlLightLight;
+            this.lblTitle.Font = new System.Drawing.Font("Arial Narrow", 24F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblTitle.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.lblTitle.Location = new System.Drawing.Point(43, 23);
+            this.lblTitle.Name = "lblTitle";
+            this.lblTitle.Size = new System.Drawing.Size(461, 46);
+            this.lblTitle.TabIndex = 0;
+            this.lblTitle.Text = "Laser engravement program";
             // 
             // lblUploadImage
             // 
@@ -85,16 +85,15 @@
             this.txtUploadImage.TabIndex = 2;
             this.txtUploadImage.TextChanged += new System.EventHandler(this.txtUploadImage_TextChanged);
             // 
-            // lbl
+            // lblSampleImage
             // 
-            this.lbl.AutoSize = true;
-            this.lbl.Font = new System.Drawing.Font("Arial Narrow", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl.Location = new System.Drawing.Point(49, 199);
-            this.lbl.Name = "lbl";
-            this.lbl.Size = new System.Drawing.Size(114, 23);
-            this.lbl.TabIndex = 4;
-            this.lbl.Text = "Sample image:";
-            this.lbl.Click += new System.EventHandler(this.label2_Click);
+            this.lblSampleImage.AutoSize = true;
+            this.lblSampleImage.Font = new System.Drawing.Font("Arial Narrow", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblSampleImage.Location = new System.Drawing.Point(49, 199);
+            this.lblSampleImage.Name = "lblSampleImage";
+            this.lblSampleImage.Size = new System.Drawing.Size(114, 23);
+            this.lblSampleImage.TabIndex = 4;
+            this.lblSampleImage.Text = "Sample image:";
             // 
             // picSampleImage
             // 
@@ -156,7 +155,6 @@
             this.lblNotice.Size = new System.Drawing.Size(186, 20);
             this.lblNotice.TabIndex = 9;
             this.lblNotice.Text = "Note: Image will be in grey scale";
-            this.lblNotice.Click += new System.EventHandler(this.label2_Click_1);
             // 
             // LaserEngravementProgram
             // 
@@ -169,11 +167,11 @@
             this.Controls.Add(this.btnExit);
             this.Controls.Add(this.btnEngrave);
             this.Controls.Add(this.picSampleImage);
-            this.Controls.Add(this.lbl);
+            this.Controls.Add(this.lblSampleImage);
             this.Controls.Add(this.btnUploadImage);
             this.Controls.Add(this.txtUploadImage);
             this.Controls.Add(this.lblUploadImage);
-            this.Controls.Add(this.label1);
+            this.Controls.Add(this.lblTitle);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
             this.MaximizeBox = false;
             this.Name = "LaserEngravementProgram";
@@ -187,11 +185,11 @@
 
         #endregion
 
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label lblTitle;
         private System.Windows.Forms.Label lblUploadImage;
         private System.Windows.Forms.Button btnUploadImage;
         private System.Windows.Forms.TextBox txtUploadImage;
-        private System.Windows.Forms.Label lbl;
+        private System.Windows.Forms.Label lblSampleImage;
         private System.Windows.Forms.PictureBox picSampleImage;
         private System.Windows.Forms.Button btnEngrave;
         private System.Windows.Forms.Button btnExit;
