@@ -18,6 +18,30 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
+  string data, checksum;
+  bool dataValidity = false,dataValid = false;
+
+  do while //verify data
+  {
+    data =  waitForData();
+    Serial.println("READY FOR CHECKSUM");
+    checksum = waitForData();
+    dataValidity = checkData(data,checksum);
+    if (!dataValidity)
+      Serial.println("RESEND");
+    else
+    {
+      Serial.println("DATA VALID");
+      dataValid = true;
+    }
+  }(!dataValid);
+
+  //Engraving starts here
+  for(int i=0; i < strlen(data); i++)
+  {
+    dataChar = data.charAt(i);
+    engrave(dataChar);
+  }
 
 }
 
@@ -34,6 +58,61 @@ void initialSettings()
     digitalWrite(MOTOR_B_PIN, OFF);
   }
   initialMode = true;
+}
+
+bool checkData(string data, int checksum)
+{
+  char dataChar = '0';
+  int dataNum = 0;
+  for(int i=0; i < strlen(data); i++)
+  {
+    dataChar = data.charAt(i);
+    dataNum += (int)dataChar;
+  }
+
+  if (dataNum == checksum)
+    return true;
+  else
+    return false;
+}
+
+string waitForData()
+{
+    string data;
+    while(!Serial.available());
+    data = Serial.readstring();
+    return data;
+}
+
+void engrave(char pixel)
+{
+  switch(pixel)
+  {
+    case '0':
+      //pass by
+      break;
+    case '1':
+      //turn laser on
+      break;   
+    case '2':
+      //turn laser on
+      break; 
+    case '3':
+      //turn laser on
+      break; 
+    case '4':
+      //turn laser on
+      break; 
+    case '5':
+      //turn laser on
+      break; 
+    case '6':
+      //turn laser on
+      break; 
+    case '7':
+      //turn laser on
+      break; 
+  }
 }
 
 /*

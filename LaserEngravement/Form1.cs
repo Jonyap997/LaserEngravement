@@ -16,6 +16,7 @@ namespace LaserEngravement
     {
         public SerialPort myport;
         public int[,] picArray = new int[100, 200];
+        public string handshakeCommand = "";
         public LaserEngravementProgram()
         {
             InitializeComponent();
@@ -64,8 +65,11 @@ namespace LaserEngravement
         {
             myport = new SerialPort();
             int pixelValue = 0;
+            string pixelString = "";
+            int pixelSum = 0;
             myport.BaudRate = 9600;
             myport.PortName = "COM5";
+            myport.DataReceived += DataReceivedHandler;
             myport.Open();
 
             for (int y = 0; y < picArray.GetLength(0); y++) //row
@@ -80,9 +84,15 @@ namespace LaserEngravement
                     {
                         pixelValue = GrayScaleMapping(picArray[y, picArray.GetLength(1)-1-x]);
                     }
-
-                    myport.WriteLine(pixelValue.ToString());
+                    pixelString += pixelValue.ToString();
+                    pixelSum += pixelValue;
                 }
+                
+                myport.WriteLine(pixelString);
+
+                while (handshakeCommand != "READY FOR CHECKSUM") ; //wait until checksum is ready to be sent
+
+                myport.WriteLine(pixelSum.ToString());
             }
 
             myport.Close();
@@ -126,6 +136,12 @@ namespace LaserEngravement
         {
             //maps 0-255 to 0-7
             return rgb / 32;
+        }
+
+        private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
+        {
+            SerialPort sp = (SerialPort)sender;
+            handshakeCommand = sp.ReadExisting();
         }
 
     }
