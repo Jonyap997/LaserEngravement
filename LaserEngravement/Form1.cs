@@ -14,9 +14,21 @@ namespace LaserEngravement
 {
     public partial class LaserEngravementProgram : Form
     {
+        public const int ROW = 100;
+        public const int COL = 200;
+        public const int BW_PIXEL_PER_BYTE = 8; //black & white
+        public const int GS_PIXEL_PER_BYTE = 2; //grey scale
+        public const int BW_NUM_OF_ELEMENTS = (ROW * COL) / BW_PIXEL_PER_BYTE;
+        public const int GS_NUM_OF_ELEMENTS = (ROW * COL) / GS_PIXEL_PER_BYTE;
+
         public SerialPort myport;
-        public int[,] picArray = new int[100, 200];
+        //public byte[,] picArray = new byte[100, 200];
+        public byte[] picArrayGS = new byte[GS_NUM_OF_ELEMENTS];
+        public byte[] picArrayBW = new byte[BW_NUM_OF_ELEMENTS];
         public string handshakeCommand = "";
+        public bool blackWhite = true;
+        Bitmap bmpBW, bmpGS;
+
         public LaserEngravementProgram()
         {
             InitializeComponent();
@@ -48,12 +60,16 @@ namespace LaserEngravement
             string replacement = "_resized" + "$1";
             string resizedImagePath = Regex.Replace(txtUploadImage.Text, pattern, replacement,RegexOptions.IgnoreCase);
             System.Drawing.Image img = System.Drawing.Image.FromFile(txtUploadImage.Text);
-            Bitmap bmp = Resize(img, 200, 100);
-            ToGrayScale(bmp,picArray);
+            bmpBW = Resize(img, 200, 100);
+            bmpGS = Resize(img, 200, 100);
+            picArrayBW = ToBlackWhite(bmpBW);
+            picArrayGS = ToGrayScale(bmpGS);
+
+            if (blackWhite)
+                picSampleImage.Image = bmpBW;     
+            else
+                picSampleImage.Image = bmpGS;   
             //bmp.Save(resizedImagePath);
-
-            picSampleImage.Image = bmp;
-
         }
 
         private void btnExit_Click(object sender, EventArgs e)
@@ -64,38 +80,35 @@ namespace LaserEngravement
         private void btnEngrave_Click(object sender, EventArgs e)
         {
             myport = new SerialPort();
-            int pixelValue = 0;
-            string pixelString = "";
-            int pixelSum = 0;
             myport.BaudRate = 9600;
             myport.PortName = "COM5";
             myport.DataReceived += DataReceivedHandler;
             myport.Open();
 
-            for (int y = 0; y < picArray.GetLength(0); y++) //row
-            {
-                for (int x = 0; x < picArray.GetLength(1); x++) //col
-                {
-                    if (y % 2 == 0) //even row
-                    {
-                        pixelValue = GrayScaleMapping(picArray[y,x]);
-                    }
-                    else
-                    {
-                        pixelValue = GrayScaleMapping(picArray[y, picArray.GetLength(1)-1-x]);
-                    }
-                    pixelString += pixelValue.ToString();
-                    pixelSum += pixelValue;
-                }
-                
-                myport.WriteLine(pixelString);
-
-                while (handshakeCommand != "READY FOR CHECKSUM") ; //wait until checksum is ready to be sent
-
-                myport.WriteLine(pixelSum.ToString());
-            }
+            
 
             myport.Close();
+        }
+
+        private void sendData()
+        {
+            if (blackWhite)
+            {
+                for(int i = 0; i < picArrayBW.Length; i++)
+                {
+                    myport.WriteLine(picArrayBW[i].ToString());
+                    while (handshakeCommand != "BYTE RECEIVED") ; //wait byte is received
+                }
+            }
+            else
+            {
+                for (int i = 0; i < picArrayGS.Length; i++)
+                {
+                    myport.WriteLine(picArrayGS[i].ToString());
+                    while (handshakeCommand != "BYTE RECEIVED") ; //wait byte is received
+                }        
+
+            }
         }
 
         //resize image 
@@ -113,9 +126,61 @@ namespace LaserEngravement
 
         }
 
-        private void ToGrayScale(Bitmap Bmp, int[,] picArray)
+        private byte[] ToGrayScale(Bitmap Bmp)
         {
-            int rgb;
+            byte rgb;
+            Color c;
+            string rowBits = "", totalBits = "";
+
+            for (int y = 0; y < Bmp.Height; y++)
+            {
+                for (int x = 0; x < Bmp.Width; x++)
+                {
+                    c = Bmp.GetPixel(x, y);
+                    rgb = (byte)Math.Round(.299 * c.R + .587 * c.G + .114 * c.B);
+                    Bmp.SetPixel(x, y, Color.FromArgb(rgb, rgb, rgb));
+
+                    if (y % 2 == 0) //even row
+                        rowBits += ToBinary(rgb);
+                    else
+                        rowBits.Insert(0,ToBinary(rgb));
+                }
+                rowBits = "";
+                totalBits += rowBits;
+            }
+
+            return GetBytesFromBinaryString(totalBits);
+        }
+
+        private string ToBinary(byte rgb)
+        {
+            switch(rgb)
+            {
+                case 0:
+                    return "0000";
+                case 1:
+                    return "0001";
+                case 2:
+                    return "0010";
+                case 3:
+                    return "0011";
+                case 4:
+                    return "0100";
+                case 5:
+                    return "0101";
+                case 6:
+                    return "0110";
+                case 7:
+                    return "0111";
+                default:
+                    return "0000";
+            }
+        }
+
+        /*
+        private void ToGrayScale(Bitmap Bmp, byte[,] picArray)
+        {
+            byte rgb;
             Color c;
 
             for (int y = 0; y < Bmp.Height; y++)
@@ -123,19 +188,64 @@ namespace LaserEngravement
                 for (int x = 0; x < Bmp.Width; x++)
                 {
                     c = Bmp.GetPixel(x, y);
-                    rgb = (int)Math.Round(.299 * c.R + .587 * c.G + .114 * c.B);
+                    rgb = (byte)Math.Round(.299 * c.R + .587 * c.G + .114 * c.B);
                     Bmp.SetPixel(x, y, Color.FromArgb(rgb, rgb, rgb));
-                    picArray[y, x] = rgb;
+                    picArray[y, x] = rgb; 
 
                 }
             }
                 
         }
-
-        private int GrayScaleMapping(int rgb)
+        */
+        private byte[] ToBlackWhite(Bitmap Bmp)
         {
-            //maps 0-255 to 0-7
-            return rgb / 32;
+            byte rgb;
+            Color c;
+            string rowBits="", totalBits="";
+
+            for (int y = 0; y < Bmp.Height; y++)
+            {
+                for (int x = 0; x < Bmp.Width; x++)
+                {
+                    c = Bmp.GetPixel(x, y);
+                    rgb = (byte)((c.R +  c.G +  c.B) /3);
+
+                    if (rgb < 128)
+                    {
+                        rgb = 0;
+                        if (y % 2 == 0) //even row
+                            rowBits += 1; //set bit as black (left -> right)
+                        else //odd row
+                            rowBits.Insert(0,"1"); //set bit as black (left <- right)
+                    } 
+                    else
+                    {
+                        rgb = 255;
+                        if (y % 2 == 0) //even row
+                            rowBits += 0; //set bit as black (left -> right)
+                        else //odd row
+                            rowBits.Insert(0, "0"); //set bit as black (left <- right)
+                    }
+                    Bmp.SetPixel(x, y, Color.FromArgb(rgb, rgb, rgb));
+                }
+                totalBits += rowBits;
+                rowBits = ""; //reset row bits
+            }
+            return GetBytesFromBinaryString(totalBits);
+        }
+
+        private byte[] GetBytesFromBinaryString(String binary)
+        {
+            var list = new List<Byte>();
+
+            for (int i = 0; i < binary.Length; i += 8)
+            {
+                String t = binary.Substring(i, 8);
+
+                list.Add(Convert.ToByte(t, 2));
+            }
+
+            return list.ToArray();
         }
 
         private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
@@ -144,5 +254,23 @@ namespace LaserEngravement
             handshakeCommand = sp.ReadExisting();
         }
 
+        private void rbBW_CheckedChanged(object sender, EventArgs e)
+        {
+            RadioButton rb = sender as RadioButton;
+
+            if (rb.Checked)
+            {
+                picSampleImage.Image = bmpBW;
+                blackWhite = true;
+            }
+                
+            else
+            {
+                picSampleImage.Image = bmpGS;
+                blackWhite = false;
+            }
+                
+            
+        }
     }
 }

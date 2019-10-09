@@ -37,7 +37,9 @@
             this.btnEngrave = new System.Windows.Forms.Button();
             this.btnExit = new System.Windows.Forms.Button();
             this.btnEmergency = new System.Windows.Forms.Button();
-            this.lblNotice = new System.Windows.Forms.Label();
+            this.lblMode = new System.Windows.Forms.Label();
+            this.rbBW = new System.Windows.Forms.RadioButton();
+            this.rbGreyScale = new System.Windows.Forms.RadioButton();
             ((System.ComponentModel.ISupportInitialize)(this.picSampleImage)).BeginInit();
             this.SuspendLayout();
             // 
@@ -139,22 +141,45 @@
             this.btnEmergency.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnEmergency.Font = new System.Drawing.Font("Arial Narrow", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnEmergency.ForeColor = System.Drawing.Color.FloralWhite;
-            this.btnEmergency.Location = new System.Drawing.Point(259, 371);
+            this.btnEmergency.Location = new System.Drawing.Point(314, 371);
             this.btnEmergency.Name = "btnEmergency";
             this.btnEmergency.Size = new System.Drawing.Size(110, 87);
             this.btnEmergency.TabIndex = 8;
             this.btnEmergency.Text = "Emergency Kill Switch";
             this.btnEmergency.UseVisualStyleBackColor = false;
             // 
-            // lblNotice
+            // lblMode
             // 
-            this.lblNotice.AutoSize = true;
-            this.lblNotice.Font = new System.Drawing.Font("Arial Narrow", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblNotice.Location = new System.Drawing.Point(165, 336);
-            this.lblNotice.Name = "lblNotice";
-            this.lblNotice.Size = new System.Drawing.Size(186, 20);
-            this.lblNotice.TabIndex = 9;
-            this.lblNotice.Text = "Note: Image will be in grey scale";
+            this.lblMode.AutoSize = true;
+            this.lblMode.Font = new System.Drawing.Font("Arial Narrow", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblMode.Location = new System.Drawing.Point(47, 336);
+            this.lblMode.Name = "lblMode";
+            this.lblMode.Size = new System.Drawing.Size(104, 23);
+            this.lblMode.TabIndex = 9;
+            this.lblMode.Text = "Colour mode:";
+            // 
+            // rbBW
+            // 
+            this.rbBW.AutoSize = true;
+            this.rbBW.Checked = true;
+            this.rbBW.Location = new System.Drawing.Point(169, 336);
+            this.rbBW.Name = "rbBW";
+            this.rbBW.Size = new System.Drawing.Size(131, 21);
+            this.rbBW.TabIndex = 10;
+            this.rbBW.TabStop = true;
+            this.rbBW.Text = "Black and White";
+            this.rbBW.UseVisualStyleBackColor = true;
+            this.rbBW.CheckedChanged += new System.EventHandler(this.rbBW_CheckedChanged);
+            // 
+            // rbGreyScale
+            // 
+            this.rbGreyScale.AutoSize = true;
+            this.rbGreyScale.Location = new System.Drawing.Point(314, 336);
+            this.rbGreyScale.Name = "rbGreyScale";
+            this.rbGreyScale.Size = new System.Drawing.Size(97, 21);
+            this.rbGreyScale.TabIndex = 11;
+            this.rbGreyScale.Text = "Grey scale\r\n";
+            this.rbGreyScale.UseVisualStyleBackColor = true;
             // 
             // LaserEngravementProgram
             // 
@@ -162,7 +187,9 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlLightLight;
             this.ClientSize = new System.Drawing.Size(582, 466);
-            this.Controls.Add(this.lblNotice);
+            this.Controls.Add(this.rbGreyScale);
+            this.Controls.Add(this.rbBW);
+            this.Controls.Add(this.lblMode);
             this.Controls.Add(this.btnEmergency);
             this.Controls.Add(this.btnExit);
             this.Controls.Add(this.btnEngrave);
@@ -194,7 +221,9 @@
         private System.Windows.Forms.Button btnEngrave;
         private System.Windows.Forms.Button btnExit;
         private System.Windows.Forms.Button btnEmergency;
-        private System.Windows.Forms.Label lblNotice;
+        private System.Windows.Forms.Label lblMode;
+        private System.Windows.Forms.RadioButton rbBW;
+        private System.Windows.Forms.RadioButton rbGreyScale;
     }
 }
 
