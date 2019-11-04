@@ -27,6 +27,8 @@ namespace LaserEngravement
         public byte[] picArrayBW = new byte[BW_NUM_OF_ELEMENTS];
         public string handshakeCommand = "";
         public bool blackWhite = true;
+        public string in_data = "";
+        public bool dataTransfer = true;
         Bitmap bmpBW, bmpGS;
 
         public LaserEngravementProgram()
@@ -81,33 +83,56 @@ namespace LaserEngravement
         {
             myport = new SerialPort();
             myport.BaudRate = 9600;
-            myport.PortName = "COM5";
+            myport.PortName = "COM3";
             myport.DataReceived += DataReceivedHandler;
             myport.Open();
-
-            
-
-            myport.Close();
+            while (dataTransfer)
+            {
+                sendData();
+            }
+            //myport.Close();
         }
 
         private void sendData()
         {
+            int checkSum = 0;
             if (blackWhite)
             {
-                for(int i = 0; i < picArrayBW.Length; i++)
+                myport.WriteLine("BW MODE");
+                for (int i = 0; i < picArrayBW.Length; i++)
                 {
                     myport.WriteLine(picArrayBW[i].ToString());
-                    while (handshakeCommand != "BYTE RECEIVED") ; //wait byte is received
+                    while (in_data != "BYTE RECEIVED") ; //wait byte is received
+                    checkSum++;
                 }
             }
             else
             {
+                myport.WriteLine("GS MODE");
                 for (int i = 0; i < picArrayGS.Length; i++)
                 {
                     myport.WriteLine(picArrayGS[i].ToString());
-                    while (handshakeCommand != "BYTE RECEIVED") ; //wait byte is received
+                    while (in_data != "BYTE RECEIVED") ; //wait byte is received
+                    checkSum++;
                 }        
 
+            }
+
+            myport.WriteLine("DONE");
+            sendCheckSum(checkSum);
+        }
+
+        private void sendCheckSum(int checkSum)
+        {
+            myport.WriteLine(checkSum.ToString());
+            while (in_data != "DATA VALID" || in_data != "DATA INVALID");
+            if (in_data == "DATA INVALID")
+            {
+                myport.WriteLine("RESEND DATA");
+            }
+            else
+            {
+                dataTransfer = false;
             }
         }
 
@@ -250,8 +275,8 @@ namespace LaserEngravement
 
         private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
         {
-            SerialPort sp = (SerialPort)sender;
-            handshakeCommand = sp.ReadExisting();
+            in_data = myport.ReadLine();
+            //this.Invoke(new EventHandler(displaydata_event));
         }
 
         private void rbBW_CheckedChanged(object sender, EventArgs e)
@@ -271,6 +296,11 @@ namespace LaserEngravement
             }
                 
             
+        }
+
+        private void displaydata_event(object sender, EventArgs e)
+        {
+            //label1.Text = in_data;
         }
     }
 }

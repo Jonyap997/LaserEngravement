@@ -40,6 +40,7 @@
             this.lblMode = new System.Windows.Forms.Label();
             this.rbBW = new System.Windows.Forms.RadioButton();
             this.rbGreyScale = new System.Windows.Forms.RadioButton();
+            this.label1 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.picSampleImage)).BeginInit();
             this.SuspendLayout();
             // 
@@ -181,12 +182,22 @@
             this.rbGreyScale.Text = "Grey scale\r\n";
             this.rbGreyScale.UseVisualStyleBackColor = true;
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(254, 91);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(46, 17);
+            this.label1.TabIndex = 12;
+            this.label1.Text = "label1";
+            // 
             // LaserEngravementProgram
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlLightLight;
             this.ClientSize = new System.Drawing.Size(582, 466);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.rbGreyScale);
             this.Controls.Add(this.rbBW);
             this.Controls.Add(this.lblMode);
@@ -224,6 +235,7 @@
         private System.Windows.Forms.Label lblMode;
         private System.Windows.Forms.RadioButton rbBW;
         private System.Windows.Forms.RadioButton rbGreyScale;
+        private System.Windows.Forms.Label label1;
     }
 }
 
