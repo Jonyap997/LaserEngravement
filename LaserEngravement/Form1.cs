@@ -90,7 +90,7 @@ namespace LaserEngravement
             {
                 sendData();
             }
-            //myport.Close();
+            myport.Close();
         }
 
         private void sendData()

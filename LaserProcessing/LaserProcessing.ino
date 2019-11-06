@@ -10,11 +10,12 @@ const int BW_PIXEL_PER_BYTE = 8;
 const int GS_PIXEL_PER_BYTE = 2;
 const int BW_NUM_OF_ELEMENTS = (ROW * COL) / BW_PIXEL_PER_BYTE;
 const int GS_NUM_OF_ELEMENTS = (ROW * COL) / GS_PIXEL_PER_BYTE;
+const int STEPS_PER_REVOLUTION = 200;
 
 bool initialMode = false;
 long laserInitialPosition = 0;
 int arrayIndex=0;
-bool dataComplete = false, dataValid = false;
+bool dataComplete = false, dataValid = false, engraveDone = false;
 int picArrayGS[GS_NUM_OF_ELEMENTS];
 int picArrayBW[BW_NUM_OF_ELEMENTS];
 String colourMode,data;
@@ -32,10 +33,6 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-
-    //Serial.println(i);
-    //i++;
-    //delay(1000);
     
     if(!dataComplete)
     {
@@ -45,12 +42,14 @@ void loop() {
     {
         checkData();
     }
-    else
+    else if (!engraveDone)
     {
         unpackDataAndEngrave();
         pixelIndex++;
+        engraveDone = checkEngraveDone();
     }
-
+    else
+        Serial.println("DONE");
 }
 
 /*
@@ -118,9 +117,11 @@ void unpackDataAndEngrave()
     if(colourMode == "BW MODE")
     {
         byte bit=0;
+
+        //extract bits to form pixels and engrave bit by bit
         for(int i=0;i<8;i++)
         {
-            bit = bitRead(picArrayBW[pixelIndex], i);
+            bit = bitRead(picArrayBW[pixelIndex], 7-i);
             engrave(bit);
         }
     }
@@ -128,22 +129,31 @@ void unpackDataAndEngrave()
     {
         byte bit=0;
         String pixelString = "";
+
+        //extract the 4 most significant bits to form the first pixel
         for(int i=0;i<4;i++)
         {
-            bit = bitRead(picArrayGS[pixelIndex], i);
+            bit = bitRead(picArrayGS[pixelIndex], 7-i);
             pixelString += bit;
         }
 
-        bit = binarytoInt(pixelString);
+        bit = binaryToInt(pixelString);
+        pixelString = "";
         engrave(bit);
+        //Serial.println("Bit:");
+        //Serial.println(bit);
 
+        //extract the 4 least significant bits to form the second pixel
         for(int i=4;i<8;i++)
         {
-            bit = bitRead(picArrayGS[pixelIndex], i);
+            bit = bitRead(picArrayGS[pixelIndex], 7-i);
             pixelString += bit;
         }
 
-        bit = binarytoInt(pixelString);
+        bit = binaryToInt(pixelString);
+        pixelString = "";
+        //Serial.println("Bit:");
+        //Serial.println(bit);
         engrave(bit);
     }
 }
@@ -156,7 +166,7 @@ void engrave(byte bit)
        turnOnLaser(bit);
     }
     
-    if(pixelCount%200 == 0)
+    if(pixelCount%199 == 0)
     {
         down();
         rowCount++;
@@ -176,53 +186,68 @@ void engrave(byte bit)
 
 void turnOnLaser(byte bit)
 {
-    
+    Serial.println("laser!!");
 }
 
-int binaryToInt(string data)
+int binaryToInt(String data)
 {
-    switch(data)
+    if (data == "0000")
+        return 0;
+    else if (data == "0001")
+        return 1;
+    else if (data == "0010")
+        return 2;
+    else if (data == "0011")
+        return 3;
+    else if (data == "0100")
+        return 4;
+    else if (data == "0101")
+        return 5;
+    else if (data == "0110")
+        return 6;
+    else if (data == "0111")
+        return 7;
+    else
+        return 0;
+}
+
+bool checkEngraveDone()
+{
+    if(colourMode == "BW MODE")
     {
-        case "0000":
-          return 0;
-        case "0001":
-          return 1;
-        case "0010":
-          return 2;
-        case "0011":
-          return 3;
-        case "0100":
-          return 4;
-        case "0101":
-          return 5;
-        case "0110":
-          return 6;
-        case "0111":
-          return 7;
-        default:
-          return 0;
+        if(pixelIndex >= 2)//BW_NUM_OF_ELEMENTS)
+          return true;
+        else 
+          return false;
+    }
+    else
+    {
+        if(pixelIndex >= 2)//GS_NUM_OF_ELEMENTS)
+          return true;
+        else 
+          return false;
     }
 }
 
 /*
  * Motor functions
  */
-void right(int greyScale)
+void right()
 {
-  
+    Serial.println("right");
 }
 
-void left(int greyScale)
+void left()
 {
-  
+    Serial.println("left");
 }
 
-void up(int greyScale)
+void up()
 {
-    
+    Serial.println("up");
 }
 
-void down(int greyScale)
+void down()
 {
-  
+    Serial.println("down");
 }
