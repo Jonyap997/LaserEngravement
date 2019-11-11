@@ -95,31 +95,62 @@ namespace LaserEngravement
 
         private void sendData()
         {
-            int checkSum = 0;
+            int checkSum = 0, i=0;
             if (blackWhite)
             {
                 myport.WriteLine("BW MODE");
-                for (int i = 0; i < picArrayBW.Length; i++)
+                while(i < picArrayBW.Length)
                 {
                     myport.WriteLine(picArrayBW[i].ToString());
-                    while (in_data != "BYTE RECEIVED") ; //wait byte is received
-                    checkSum++;
+                    while (in_data != "BYTE RECEIVED"); //wait byte is received
+                    while (in_data == "SENDING CHECK");
+                    if (in_data == picArrayBW[i].ToString())
+                    {
+                        i++;
+                        //checkSum++;
+                        myport.WriteLine("DATA VALID");
+                    }
+                    else
+                        myport.WriteLine("DATA INVALID");
+
+                    if (i < picArrayBW.Length)
+                    {
+                        myport.WriteLine("NOT DONE");
+                        while (in_data != "SEND NEXT BYTE") ;
+                    }
+                        
                 }
             }
             else
             {
                 myport.WriteLine("GS MODE");
-                for (int i = 0; i < picArrayGS.Length; i++)
+                while (i < picArrayGS.Length)
                 {
                     myport.WriteLine(picArrayGS[i].ToString());
                     while (in_data != "BYTE RECEIVED") ; //wait byte is received
-                    checkSum++;
+                    while (in_data == "SENDING CHECK") ;
+                    if (in_data == picArrayGS[i].ToString())
+                    {
+                        i++;
+                        //checkSum++;
+                        myport.WriteLine("DATA VALID");
+                    }
+                    else
+                        myport.WriteLine("DATA INVALID");
+
+                    while (in_data != "PIXELS DONE") ; //wait till pixels have been engraved
+                    if (i < picArrayGS.Length)
+                    {
+                        myport.WriteLine("NOT DONE");
+                        while (in_data != "SEND NEXT BYTE") ; //wait till arduino is ready to receive next byte
+                    }
+                        
                 }        
 
             }
 
             myport.WriteLine("DONE");
-            sendCheckSum(checkSum);
+            //sendCheckSum(checkSum);
         }
 
         private void sendCheckSum(int checkSum)
