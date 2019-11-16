@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
 using System.IO.Ports;
+using System.Threading;
+using System.Diagnostics;
 
 namespace LaserEngravement
 {
@@ -22,7 +24,6 @@ namespace LaserEngravement
         public const int GS_NUM_OF_ELEMENTS = (ROW * COL) / GS_PIXEL_PER_BYTE;
 
         public SerialPort myport;
-        //public byte[,] picArray = new byte[100, 200];
         public byte[] picArrayGS = new byte[GS_NUM_OF_ELEMENTS];
         public byte[] picArrayBW = new byte[BW_NUM_OF_ELEMENTS];
         public string handshakeCommand = "";
@@ -70,101 +71,106 @@ namespace LaserEngravement
             if (blackWhite)
                 picSampleImage.Image = bmpBW;     
             else
-                picSampleImage.Image = bmpGS;   
+                picSampleImage.Image = bmpGS;
             //bmp.Save(resizedImagePath);
+
+            btnEngrave.Enabled = true;
         }
 
         private void btnExit_Click(object sender, EventArgs e)
         {
+
+            myport.Close();
+
             this.Close();
+
         }
 
         private void btnEngrave_Click(object sender, EventArgs e)
         {
+            int i = 0;
+            btnEngrave.Enabled = false;
+            btnExit.Enabled = false;
             myport = new SerialPort();
-            myport.BaudRate = 9600;
+            myport.BaudRate = 19200;
             myport.PortName = "COM3";
-            myport.DataReceived += DataReceivedHandler;
+            //myport.DataReceived += DataReceivedHandler;
             myport.Open();
-            while (dataTransfer)
-            {
-                sendData();
-            }
-            myport.Close();
+            sendData();
+
+            btnExit.Enabled = true;
         }
 
         private void sendData()
         {
-            int checkSum = 0, i=0;
+            int i = 0;
+
+            myport.WriteLine("READY");
+            waitForConfirmation("READY");
+
             if (blackWhite)
             {
                 myport.WriteLine("BW MODE");
-                while(i < picArrayBW.Length)
+                while (i < picArrayBW.Length)
                 {
-                    myport.WriteLine(picArrayBW[i].ToString());
-                    while (in_data != "BYTE RECEIVED"); //wait byte is received
-                    while (in_data == "SENDING CHECK");
-                    if (in_data == picArrayBW[i].ToString())
-                    {
-                        i++;
-                        //checkSum++;
+                    waitForConfirmation("READY TO RECEIVE DATA");
+                    myport.WriteLine("SENDING DATA");
+                    myport.WriteLine(i.ToString());
+                    waitForConfirmation("BYTE RECEIVED");
+                    waitForConfirmation("SENDING CHECK");
+
+                    in_data = myport.ReadLine();
+
+                    if (in_data.Trim() == i.ToString())
                         myport.WriteLine("DATA VALID");
-                    }
                     else
                         myport.WriteLine("DATA INVALID");
+
+                    waitForConfirmation("PIXELS DONE");
+                    i++;
 
                     if (i < picArrayBW.Length)
                     {
+                        waitForConfirmation("DONE?");
                         myport.WriteLine("NOT DONE");
-                        while (in_data != "SEND NEXT BYTE") ;
+                        waitForConfirmation("SEND NEXT BYTE");
                     }
-                        
                 }
+
+                
             }
             else
             {
-                myport.WriteLine("GS MODE");
-                while (i < picArrayGS.Length)
-                {
-                    myport.WriteLine(picArrayGS[i].ToString());
-                    while (in_data != "BYTE RECEIVED") ; //wait byte is received
-                    while (in_data == "SENDING CHECK") ;
-                    if (in_data == picArrayGS[i].ToString())
-                    {
-                        i++;
-                        //checkSum++;
+                 myport.WriteLine("GS MODE");
+                 while (i < picArrayGS.Length)
+                 {
+                    waitForConfirmation("READY TO RECEIVE DATA");
+                    myport.WriteLine("SENDING DATA");
+                    myport.WriteLine(i.ToString());
+                    waitForConfirmation("BYTE RECEIVED");
+                    waitForConfirmation("SENDING CHECK");
+
+                    in_data = myport.ReadLine();
+
+                    if (in_data.Trim() == i.ToString())
                         myport.WriteLine("DATA VALID");
-                    }
                     else
                         myport.WriteLine("DATA INVALID");
 
-                    while (in_data != "PIXELS DONE") ; //wait till pixels have been engraved
-                    if (i < picArrayGS.Length)
+                    waitForConfirmation("PIXELS DONE");
+                    i++;
+
+                    if (i < picArrayBW.Length)
                     {
+                        waitForConfirmation("DONE?");
                         myport.WriteLine("NOT DONE");
-                        while (in_data != "SEND NEXT BYTE") ; //wait till arduino is ready to receive next byte
+                        waitForConfirmation("SEND NEXT BYTE");
                     }
-                        
+
                 }        
 
-            }
-
+             }
             myport.WriteLine("DONE");
-            //sendCheckSum(checkSum);
-        }
-
-        private void sendCheckSum(int checkSum)
-        {
-            myport.WriteLine(checkSum.ToString());
-            while (in_data != "DATA VALID" || in_data != "DATA INVALID");
-            if (in_data == "DATA INVALID")
-            {
-                myport.WriteLine("RESEND DATA");
-            }
-            else
-            {
-                dataTransfer = false;
-            }
         }
 
         //resize image 
@@ -179,7 +185,7 @@ namespace LaserEngravement
 
         private void LaserEngravementProgram_Load(object sender, EventArgs e)
         {
-
+            btnEngrave.Enabled = false;
         }
 
         private byte[] ToGrayScale(Bitmap Bmp)
@@ -233,26 +239,13 @@ namespace LaserEngravement
             }
         }
 
-        /*
-        private void ToGrayScale(Bitmap Bmp, byte[,] picArray)
+       private void waitForConfirmation(string confirmMsg)
         {
-            byte rgb;
-            Color c;
-
-            for (int y = 0; y < Bmp.Height; y++)
+            do
             {
-                for (int x = 0; x < Bmp.Width; x++)
-                {
-                    c = Bmp.GetPixel(x, y);
-                    rgb = (byte)Math.Round(.299 * c.R + .587 * c.G + .114 * c.B);
-                    Bmp.SetPixel(x, y, Color.FromArgb(rgb, rgb, rgb));
-                    picArray[y, x] = rgb; 
-
-                }
-            }
-                
+                in_data = myport.ReadLine();
+            } while (in_data.Trim() != confirmMsg);
         }
-        */
         private byte[] ToBlackWhite(Bitmap Bmp)
         {
             byte rgb;
@@ -304,12 +297,6 @@ namespace LaserEngravement
             return list.ToArray();
         }
 
-        private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
-        {
-            in_data = myport.ReadLine();
-            //this.Invoke(new EventHandler(displaydata_event));
-        }
-
         private void rbBW_CheckedChanged(object sender, EventArgs e)
         {
             RadioButton rb = sender as RadioButton;
@@ -327,11 +314,6 @@ namespace LaserEngravement
             }
                 
             
-        }
-
-        private void displaydata_event(object sender, EventArgs e)
-        {
-            //label1.Text = in_data;
         }
     }
 }
