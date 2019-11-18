@@ -15,13 +15,15 @@ const int STEPS_PER_REVOLUTION = 200;
 
 long laserInitialPosition = 0;
 int arrayIndex=0;
-bool initialDone = false, dataValid = false, engraveDone = false;
+bool initialDone = false, dataValid = false, engraveDone = false, dataReceived = false, dataValidated = false, dataCheck = false, engraveCheck = false;
+bool receiveDataFlag = true, engraveDataFlag = false, pixelDoneFlag = false, checkEngraveFlag = false;
 //int picArrayGS[GS_NUM_OF_ELEMENTS];
 //int picArrayBW[BW_NUM_OF_ELEMENTS];
-String colourMode,data, dataValidStr, engraveDoneStr;
-int checkSum, sum = 0, pixelCount=1, rowCount=1;
-int i =0;
-bool toggle = false;
+String colourMode,data, dataValidStr, engraveDoneStr, checkSerialConnection, checkReady, checkData, pixelCheckDone, sendNextByte;
+int pixelCount=1, rowCount=1;
+
+String g = "";
+bool gg = false;
 
 Stepper stepperA(STEPS_PER_REVOLUTION, 8, 9, 10, 11);
 
@@ -46,13 +48,21 @@ void loop() {
     }
     else if(!engraveDone)
     {
-        receiveData();
+        if (receiveDataFlag)
+            receiveData();
         
-        if(dataValid)
-            unpackDataAndEngrave();
-
-        engraveDone = checkEngraveDone();
+        if(engraveDataFlag)
+        {
+            if (!pixelDoneFlag)
+                unpackDataAndEngrave();
+            else
+                pixelDoneChecker();
+        }
+        if (checkEngraveFlag)
+            checkEngraveDone();
+            
     }
+    
 }
 
 /*
@@ -61,50 +71,96 @@ void loop() {
 
 void initialSettings()
 {
-    String checkSerialConnection = "";
-    checkSerialConnection = Serial.read();
-    
-    if (checkSerialConnection == "READY")
+    if (!compareString(checkSerialConnection, "READY") && !compareString(checkSerialConnection, "1") && !compareString(checkSerialConnection, "2"))
+    {
+        checkSerialConnection = Serial.readString();
+    }
+        
+    if (compareString(checkSerialConnection, "READY"))
+        checkSerialConnection = "1";
+
+    if (compareString(checkSerialConnection, "1"))
     {
         Serial.println("READY");
-        colourMode = Serial.read();
-        while (colourMode == "READY")
+        checkReady = Serial.readString();
+    }
+
+    if (compareString(checkReady, "READY FOR COLOUR MODE"))
+    {
+        checkSerialConnection = "2";
+        Serial.println("READY FOR COLOUR MODE");
+        colourMode = Serial.readString();
+        if (compareString(colourMode, "BW MODE")|| compareString(colourMode, "GS MODE"))
         {
-            colourMode = Serial.read();
+            stepperA.setSpeed(60); 
+            initialDone = true;
+
+            checkSerialConnection = "";
+            checkReady = "";
+            
+        }
+    }
+}
+
+void receiveData()
+{
+    if (dataReceived)
+    {
+        if (!dataCheck)
+            Serial.println("BYTE RECEIVED");
+
+        checkData = Serial.readString();
+        if (compareString(checkData, "CHECK RECEIVED"))
+        {       
+            dataValidated = true;
+            dataReceived = false;
+            dataCheck = false;
+        }
+        else if (compareString(checkData, "READY FOR CHECK") || dataCheck)
+        {
+            Serial.println(data);
+            dataCheck = true;
         }
         
-        stepperA.setSpeed(60); 
-        initialDone = true;
     }
-}
-
-void receiveData()
-{
-    Serial.println("READY TO RECEIVE DATA");
-    data = Serial.read();
-    while (data == "SENDING DATA" || data == "-1")
+    else if (!dataReceived && !dataValidated)
     {
-        data = Serial.read();
+        Serial.println("READY TO RECEIVE DATA");
+        
+        data = Serial.readString();
+        if (isNumeric(data))
+        {
+            if (data.toInt() >= 0 && data.toInt() <= 255)
+                dataReceived = true;
+        }
+            
     }
-    Serial.println("BYTE RECEIVED");
 
-    Serial.println("SENDING CHECK");
-    Serial.println(data);
-
-    dataValidStr = Serial.read();
-    while (dataValidStr == "-1")
+    if (dataValidated)
     {
-        dataValidStr = Serial.read();
+        Serial.println("READY TO RECEIVE VALIDITY");
+        dataValidStr = Serial.readString();
+        if (compareString(dataValidStr, "DATA VALID") || compareString(dataValidStr, "DATA INVALID"))
+        {
+            if(dataValidStr == "DATA VALID")
+              dataValid = true;
+            else
+              dataValid = false;
+
+            dataReceived = false;
+            dataValidated = false;
+            dataValidStr = "";
+            receiveDataFlag = false;
+            engraveDataFlag = true;
+
+        }
     }
-    if(dataValidStr == "DATA VALID")
-        dataValid = true;
-    else
-        dataValid = false;
 }
 
 void unpackDataAndEngrave()
 {
-    if(colourMode == "BW MODE")
+    Serial.println("STARTED ENGRAVING");
+    if(compareString(colourMode, "BW MODE"))
     {
         byte bit=0;
 
@@ -114,9 +170,9 @@ void unpackDataAndEngrave()
             bit = bitRead(data.toInt(), 7-i);
             engrave(bit);
         }
-        Serial.println("PIXELS DONE");
+        pixelDoneFlag = true;
     }
-    else if(colourMode == "GS MODE")
+    else if(compareString(colourMode, "GS MODE"))
     {
         byte bit=0;
         String pixelString = "";
@@ -143,101 +199,57 @@ void unpackDataAndEngrave()
         pixelString = "";
         engrave(bit);
 
-        Serial.println("PIXELS DONE");
+        pixelDoneFlag = true;
     }
 }
 
-/*
-void receiveData()
+bool compareString(String compare, String keyword)
 {
-  data = Serial.read();
-  if(data != "DONE")
-  {
-      if(colourMode == "BW MODE")
-      {
-        //picArrayBW[arrayIndex] = data.toInt();
-        arrayIndex++;
-        sum++;
-      }
-      else if(colourMode == "GS MODE") 
-      {
-        //picArrayGS[arrayIndex] = data.toInt();
-        arrayIndex++;
-        sum++;
-      }
-      Serial.println("BYTE RECEIVED");
-  }
-  else if(data == "DONE")
-  {
-      dataComplete = true;
-  }
-  
+    if (compare.indexOf(keyword) > -1)
+        return true;
+    else
+        return false;
 }
 
-bool checkData()
+bool isNumeric(String str)
 {
-    checkSum = Serial.read();
-
-    if (sum == checkSum)
+    bool bPoint=false;
+    str.trim();
+    if(str.length()<1)
     {
-        dataValid = true;
-        Serial.println("DATA VALID");
-    }
-    else 
-    {
-        Serial.println("DATA INVALID");
-        dataComplete = false;
-        while(Serial.read() != "RESEND DATA");
+        return false;
     }
     
+    for(unsigned char i = 0; i < str.length(); i++)
+    {
+        
+        if ( !(isDigit(str.charAt(i)) || str.charAt(i) == '.' )|| bPoint) 
+        {
+            return false;
+        }
+        if(str.charAt(i) == '.')
+        {
+            bPoint=true;
+        }
+    }
+    return true;
 }
 
-void unpackDataAndEngrave()
+void pixelDoneChecker()
 {
-    if(colourMode == "BW MODE")
+    Serial.println("PIXELS DONE");
+
+    pixelCheckDone = Serial.readString();
+
+    if (compareString(pixelCheckDone, "PIXELS DONE"))
     {
-        byte bit=0;
-
-        //extract bits to form pixels and engrave bit by bit
-        for(int i=0;i<8;i++)
-        {
-            //bit = bitRead(picArrayBW[pixelIndex], 7-i);
-            engrave(bit);
-        }
-    }
-    else if(colourMode == "GS MODE")
-    {
-        byte bit=0;
-        String pixelString = "";
-
-        //extract the 4 most significant bits to form the first pixel
-        for(int i=0;i<4;i++)
-        {
-            //bit = bitRead(picArrayGS[pixelIndex], 7-i);
-            pixelString += bit;
-        }
-
-        bit = binaryToInt(pixelString);
-        pixelString = "";
-        engrave(bit);
-        //Serial.println("Bit:");
-        //Serial.println(bit);
-
-        //extract the 4 least significant bits to form the second pixel
-        for(int i=4;i<8;i++)
-        {
-            //bit = bitRead(picArrayGS[pixelIndex], 7-i);
-            pixelString += bit;
-        }
-
-        bit = binaryToInt(pixelString);
-        pixelString = "";
-        //Serial.println("Bit:");
-        //Serial.println(bit);
-        engrave(bit);
+        pixelCheckDone = "";
+        engraveDataFlag = false;
+        checkEngraveFlag = true;
+        pixelDoneFlag = false;   
     }
 }
-*/
+
 void engrave(byte bit)
 {
     if(bit > 0)
@@ -245,17 +257,17 @@ void engrave(byte bit)
     
     if(pixelCount%199 == 0)
     {
-        down();
+        //down();
         rowCount++;
     }
     else if(rowCount%2 == 0)
     {
-        left();
+        //left();
         pixelCount++;
     }
     else
     {
-        right();
+        //right();
         pixelCount++;
     }
 
@@ -263,7 +275,7 @@ void engrave(byte bit)
 
 void turnOnLaser(byte bit)
 {
-    Serial.println("laser!!");
+    //Serial.println("laser!!");
 }
 
 int binaryToInt(String data)
@@ -290,20 +302,31 @@ int binaryToInt(String data)
 
 bool checkEngraveDone()
 {
-    Serial.println("DONE?");
-    engraveDoneStr = Serial.read();
-    while (engraveDoneStr == "DATA VALID" || engraveDoneStr == "-1")
+    if (!engraveCheck)
     {
-        engraveDoneStr = Serial.read();
+        Serial.println("DONE?");
+        engraveDoneStr = Serial.readString();
     }
-    if(engraveDoneStr == "DONE")
+        
+    if(compareString(engraveDoneStr,"DONE"))
     {
-        return true;
+        engraveDone = true;
     }        
-    else 
+    else if(compareString(engraveDoneStr,"NOPE") || engraveCheck)
     {
+        engraveCheck = true;
         Serial.println("SEND NEXT BYTE");
-        return false;
+        sendNextByte = Serial.readString();
+        
+        if (compareString(sendNextByte,"SEND NEXT BYTE"))
+        {
+            engraveCheck = false;
+            checkEngraveFlag = false;
+            receiveDataFlag = true;
+            engraveDoneStr = "";
+            sendNextByte = "";
+            engraveDone = false;
+        }
     } 
 }
 

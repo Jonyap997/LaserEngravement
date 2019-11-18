@@ -39,7 +39,8 @@
             this.lblMode = new System.Windows.Forms.Label();
             this.rbBW = new System.Windows.Forms.RadioButton();
             this.rbGreyScale = new System.Windows.Forms.RadioButton();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.lblStatus = new System.Windows.Forms.Label();
+            this.lblStatusBox = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.picSampleImage)).BeginInit();
             this.SuspendLayout();
             // 
@@ -59,7 +60,7 @@
             // 
             this.lblUploadImage.AutoSize = true;
             this.lblUploadImage.Font = new System.Drawing.Font("Arial Narrow", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblUploadImage.Location = new System.Drawing.Point(49, 154);
+            this.lblUploadImage.Location = new System.Drawing.Point(66, 109);
             this.lblUploadImage.Name = "lblUploadImage";
             this.lblUploadImage.Size = new System.Drawing.Size(111, 23);
             this.lblUploadImage.TabIndex = 1;
@@ -70,7 +71,7 @@
             this.btnUploadImage.BackColor = System.Drawing.SystemColors.ControlLight;
             this.btnUploadImage.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.btnUploadImage.Font = new System.Drawing.Font("Arial Narrow", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnUploadImage.Location = new System.Drawing.Point(430, 155);
+            this.btnUploadImage.Location = new System.Drawing.Point(447, 110);
             this.btnUploadImage.Name = "btnUploadImage";
             this.btnUploadImage.Size = new System.Drawing.Size(35, 23);
             this.btnUploadImage.TabIndex = 3;
@@ -80,7 +81,7 @@
             // 
             // txtUploadImage
             // 
-            this.txtUploadImage.Location = new System.Drawing.Point(166, 156);
+            this.txtUploadImage.Location = new System.Drawing.Point(183, 111);
             this.txtUploadImage.Name = "txtUploadImage";
             this.txtUploadImage.ReadOnly = true;
             this.txtUploadImage.Size = new System.Drawing.Size(258, 22);
@@ -91,7 +92,7 @@
             // 
             this.lblSampleImage.AutoSize = true;
             this.lblSampleImage.Font = new System.Drawing.Font("Arial Narrow", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblSampleImage.Location = new System.Drawing.Point(49, 199);
+            this.lblSampleImage.Location = new System.Drawing.Point(66, 154);
             this.lblSampleImage.Name = "lblSampleImage";
             this.lblSampleImage.Size = new System.Drawing.Size(114, 23);
             this.lblSampleImage.TabIndex = 4;
@@ -99,7 +100,7 @@
             // 
             // picSampleImage
             // 
-            this.picSampleImage.Location = new System.Drawing.Point(169, 199);
+            this.picSampleImage.Location = new System.Drawing.Point(186, 154);
             this.picSampleImage.Name = "picSampleImage";
             this.picSampleImage.Size = new System.Drawing.Size(275, 125);
             this.picSampleImage.TabIndex = 5;
@@ -111,7 +112,7 @@
             this.btnEngrave.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Gray;
             this.btnEngrave.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnEngrave.Font = new System.Drawing.Font("Arial Narrow", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnEngrave.Location = new System.Drawing.Point(195, 371);
+            this.btnEngrave.Location = new System.Drawing.Point(195, 387);
             this.btnEngrave.Name = "btnEngrave";
             this.btnEngrave.Size = new System.Drawing.Size(80, 35);
             this.btnEngrave.TabIndex = 6;
@@ -125,7 +126,7 @@
             this.btnExit.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Gray;
             this.btnExit.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnExit.Font = new System.Drawing.Font("Arial Narrow", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnExit.Location = new System.Drawing.Point(331, 371);
+            this.btnExit.Location = new System.Drawing.Point(357, 387);
             this.btnExit.Name = "btnExit";
             this.btnExit.Size = new System.Drawing.Size(80, 35);
             this.btnExit.TabIndex = 7;
@@ -137,7 +138,7 @@
             // 
             this.lblMode.AutoSize = true;
             this.lblMode.Font = new System.Drawing.Font("Arial Narrow", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblMode.Location = new System.Drawing.Point(47, 336);
+            this.lblMode.Location = new System.Drawing.Point(76, 291);
             this.lblMode.Name = "lblMode";
             this.lblMode.Size = new System.Drawing.Size(104, 23);
             this.lblMode.TabIndex = 9;
@@ -147,7 +148,7 @@
             // 
             this.rbBW.AutoSize = true;
             this.rbBW.Checked = true;
-            this.rbBW.Location = new System.Drawing.Point(169, 336);
+            this.rbBW.Location = new System.Drawing.Point(195, 291);
             this.rbBW.Name = "rbBW";
             this.rbBW.Size = new System.Drawing.Size(131, 21);
             this.rbBW.TabIndex = 10;
@@ -159,22 +160,31 @@
             // rbGreyScale
             // 
             this.rbGreyScale.AutoSize = true;
-            this.rbGreyScale.Location = new System.Drawing.Point(314, 336);
+            this.rbGreyScale.Location = new System.Drawing.Point(340, 291);
             this.rbGreyScale.Name = "rbGreyScale";
             this.rbGreyScale.Size = new System.Drawing.Size(97, 21);
             this.rbGreyScale.TabIndex = 11;
             this.rbGreyScale.Text = "Grey scale\r\n";
             this.rbGreyScale.UseVisualStyleBackColor = true;
             // 
-            // textBox1
+            // lblStatus
             // 
-            this.textBox1.Location = new System.Drawing.Point(27, 81);
-            this.textBox1.MaxLength = 70000;
-            this.textBox1.Multiline = true;
-            this.textBox1.Name = "textBox1";
-            this.textBox1.ReadOnly = true;
-            this.textBox1.Size = new System.Drawing.Size(516, 69);
-            this.textBox1.TabIndex = 12;
+            this.lblStatus.AutoSize = true;
+            this.lblStatus.Font = new System.Drawing.Font("Arial Narrow", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblStatus.Location = new System.Drawing.Point(121, 337);
+            this.lblStatus.Name = "lblStatus";
+            this.lblStatus.Size = new System.Drawing.Size(56, 23);
+            this.lblStatus.TabIndex = 12;
+            this.lblStatus.Text = "Status:";
+            // 
+            // lblStatusBox
+            // 
+            this.lblStatusBox.AutoSize = true;
+            this.lblStatusBox.Font = new System.Drawing.Font("Arial Narrow", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblStatusBox.Location = new System.Drawing.Point(191, 337);
+            this.lblStatusBox.Name = "lblStatusBox";
+            this.lblStatusBox.Size = new System.Drawing.Size(0, 23);
+            this.lblStatusBox.TabIndex = 13;
             // 
             // LaserEngravementProgram
             // 
@@ -182,7 +192,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlLightLight;
             this.ClientSize = new System.Drawing.Size(582, 466);
-            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.lblStatusBox);
+            this.Controls.Add(this.lblStatus);
             this.Controls.Add(this.rbGreyScale);
             this.Controls.Add(this.rbBW);
             this.Controls.Add(this.lblMode);
@@ -218,7 +229,8 @@
         private System.Windows.Forms.Label lblMode;
         private System.Windows.Forms.RadioButton rbBW;
         private System.Windows.Forms.RadioButton rbGreyScale;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.Label lblStatus;
+        private System.Windows.Forms.Label lblStatusBox;
     }
 }
 

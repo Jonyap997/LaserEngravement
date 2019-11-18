@@ -96,6 +96,7 @@ namespace LaserEngravement
             myport.PortName = "COM3";
             //myport.DataReceived += DataReceivedHandler;
             myport.Open();
+            lblStatusBox.Text = "Connection established";
             sendData();
 
             btnExit.Enabled = true;
@@ -104,36 +105,59 @@ namespace LaserEngravement
         private void sendData()
         {
             int i = 0;
+            string checkData = "";
 
+            lblStatusBox.Text = "Waiting for Arduino to be ready";
             myport.WriteLine("READY");
-            waitForConfirmation("READY");
+            waitForConfirmation("READY"); 
+            lblStatusBox.Text = "Ready for data transmission";
 
             if (blackWhite)
             {
+                lblStatusBox.Text = "Ready for colour mode";
+                myport.WriteLine("READY FOR COLOUR MODE");
+                waitForConfirmation("READY FOR COLOUR MODE");
                 myport.WriteLine("BW MODE");
+                lblStatusBox.Text = "Colour mode set";
                 while (i < picArrayBW.Length)
                 {
+                    lblStatusBox.Text = "Waiting for Arduino to be ready to receive data";
                     waitForConfirmation("READY TO RECEIVE DATA");
-                    myport.WriteLine("SENDING DATA");
-                    myport.WriteLine(i.ToString());
+                    lblStatusBox.Text = "Sending data";
+                    myport.WriteLine(picArrayBW[i].ToString());
+                    lblStatusBox.Text = "Waiting for confirmation from Arduino";
                     waitForConfirmation("BYTE RECEIVED");
-                    waitForConfirmation("SENDING CHECK");
+                    lblStatusBox.Text = "Validating data";
+                    myport.WriteLine("READY FOR CHECK");
+                    checkData = myport.ReadLine();
+                    myport.WriteLine("CHECK RECEIVED");
 
-                    in_data = myport.ReadLine();
-
-                    if (in_data.Trim() == i.ToString())
+                    waitForConfirmation("READY TO RECEIVE VALIDITY");
+                    if (checkData.Trim() == picArrayBW[i].ToString())
+                    {
                         myport.WriteLine("DATA VALID");
+                        lblStatusBox.Text = "Data valid";
+                    }
                     else
+                    {
                         myport.WriteLine("DATA INVALID");
+                        lblStatusBox.Text = "Data invalid";
+                        continue;
+                    }
 
+                    lblStatusBox.Text = "Engraving process started";
                     waitForConfirmation("PIXELS DONE");
+                    myport.WriteLine("PIXELS DONE");
+                    lblStatusBox.Text = "Pixels done";
                     i++;
 
                     if (i < picArrayBW.Length)
                     {
                         waitForConfirmation("DONE?");
-                        myport.WriteLine("NOT DONE");
+                        myport.WriteLine("NOPE");
+                        lblStatusBox.Text = "Sending next byte";
                         waitForConfirmation("SEND NEXT BYTE");
+                        myport.WriteLine("SEND NEXT BYTE");
                     }
                 }
 
@@ -141,35 +165,54 @@ namespace LaserEngravement
             }
             else
             {
-                 myport.WriteLine("GS MODE");
-                 while (i < picArrayGS.Length)
-                 {
+                lblStatusBox.Text = "Ready for colour mode";
+                myport.WriteLine("READY FOR COLOUR MODE");
+                waitForConfirmation("READY FOR COLOUR MODE");
+                myport.WriteLine("GS MODE");
+                lblStatusBox.Text = "Colour mode set";
+                while (i < picArrayGS.Length)
+                {
+                    lblStatusBox.Text = "Waiting for Arduino to be ready to receive data";
                     waitForConfirmation("READY TO RECEIVE DATA");
-                    myport.WriteLine("SENDING DATA");
-                    myport.WriteLine(i.ToString());
+                    lblStatusBox.Text = "Sending data";
+                    myport.WriteLine(picArrayGS[i].ToString());
+                    lblStatusBox.Text = "Waiting for confirmation from Arduino";
                     waitForConfirmation("BYTE RECEIVED");
-                    waitForConfirmation("SENDING CHECK");
+                    lblStatusBox.Text = "Validating data";
+                    myport.WriteLine("READY FOR CHECK");
+                    checkData = myport.ReadLine();
+                    myport.WriteLine("CHECK RECEIVED");
 
-                    in_data = myport.ReadLine();
-
-                    if (in_data.Trim() == i.ToString())
-                        myport.WriteLine("DATA VALID");
-                    else
-                        myport.WriteLine("DATA INVALID");
-
-                    waitForConfirmation("PIXELS DONE");
-                    i++;
-
-                    if (i < picArrayBW.Length)
+                    waitForConfirmation("READY TO RECEIVE VALIDITY");
+                    if (checkData.Trim() == picArrayGS[i].ToString())
                     {
-                        waitForConfirmation("DONE?");
-                        myport.WriteLine("NOT DONE");
-                        waitForConfirmation("SEND NEXT BYTE");
+                        myport.WriteLine("DATA VALID");
+                        lblStatusBox.Text = "Data valid";
+                    }
+                    else
+                    {
+                        myport.WriteLine("DATA INVALID");
+                        lblStatusBox.Text = "Data invalid";
+                        continue;
                     }
 
-                }        
+                    lblStatusBox.Text = "Engraving process started";
+                    waitForConfirmation("PIXELS DONE");
+                    myport.WriteLine("PIXELS DONE");
+                    lblStatusBox.Text = "Pixels done";
+                    i++;
 
-             }
+                    if (i < picArrayGS.Length)
+                    {
+                        waitForConfirmation("DONE?");
+                        myport.WriteLine("NOPE");
+                        lblStatusBox.Text = "Sending next byte";
+                        waitForConfirmation("SEND NEXT BYTE");
+                        myport.WriteLine("SEND NEXT BYTE");
+                    }
+                }
+
+            }
             myport.WriteLine("DONE");
         }
 
@@ -243,7 +286,7 @@ namespace LaserEngravement
         {
             do
             {
-                in_data = myport.ReadLine();
+                in_data = myport.ReadLine(); 
             } while (in_data.Trim() != confirmMsg);
         }
         private byte[] ToBlackWhite(Bitmap Bmp)
@@ -296,6 +339,7 @@ namespace LaserEngravement
 
             return list.ToArray();
         }
+
 
         private void rbBW_CheckedChanged(object sender, EventArgs e)
         {
