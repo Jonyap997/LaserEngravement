@@ -1,6 +1,6 @@
 #include <Stepper.h>
 
-const int LASER_PIN = 13;
+const int LASER_PIN = 5;
 const int MOTOR_A_PIN = 3;
 const int MOTOR_B_PIN = 4;
 const int OFF = 0;
@@ -140,19 +140,19 @@ void receiveData()
     {
         Serial.println("READY TO RECEIVE VALIDITY");
         dataValidStr = Serial.readString();
-        if (compareString(dataValidStr, "DATA VALID") || compareString(dataValidStr, "DATA INVALID"))
+        if (compareString(dataValidStr, "DATA VALID"))
         {
-            if(dataValidStr == "DATA VALID")
-              dataValid = true;
-            else
-              dataValid = false;
-
+            receiveDataFlag = false;
+            engraveDataFlag = true;
             dataReceived = false;
             dataValidated = false;
             dataValidStr = "";
-            receiveDataFlag = false;
-            engraveDataFlag = true;
-
+        }
+        else if (compareString(dataValidStr, "DATA INVALID"))
+        {
+            dataReceived = false;
+            dataValidated = false;
+            dataValidStr = "";
         }
     }
 }
@@ -275,7 +275,17 @@ void engrave(byte bit)
 
 void turnOnLaser(byte bit)
 {
-    //Serial.println("laser!!");
+    if(compareString(colourMode, "BW MODE"))
+    {
+        analogWrite(LASER_PIN,255);
+    }
+    else
+    {
+        analogWrite(LASER_PIN,map(bit,0,7,0,255));
+    }
+
+    delay(500);
+    analogWrite(LASER_PIN,0);
 }
 
 int binaryToInt(String data)

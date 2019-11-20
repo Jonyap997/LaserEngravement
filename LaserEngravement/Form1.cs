@@ -16,14 +16,14 @@ namespace LaserEngravement
 {
     public partial class LaserEngravementProgram : Form
     {
-        public const int ROW = 100;
-        public const int COL = 200;
+        public const int ROW = 50;
+        public const int COL = 100;
         public const int BW_PIXEL_PER_BYTE = 8; //black & white
         public const int GS_PIXEL_PER_BYTE = 2; //grey scale
         public const int BW_NUM_OF_ELEMENTS = (ROW * COL) / BW_PIXEL_PER_BYTE;
         public const int GS_NUM_OF_ELEMENTS = (ROW * COL) / GS_PIXEL_PER_BYTE;
 
-        public SerialPort myport;
+        public SerialPort myport = new SerialPort();
         public byte[] picArrayGS = new byte[GS_NUM_OF_ELEMENTS];
         public byte[] picArrayBW = new byte[BW_NUM_OF_ELEMENTS];
         public string handshakeCommand = "";
@@ -63,8 +63,8 @@ namespace LaserEngravement
             string replacement = "_resized" + "$1";
             string resizedImagePath = Regex.Replace(txtUploadImage.Text, pattern, replacement,RegexOptions.IgnoreCase);
             System.Drawing.Image img = System.Drawing.Image.FromFile(txtUploadImage.Text);
-            bmpBW = Resize(img, 200, 100);
-            bmpGS = Resize(img, 200, 100);
+            bmpBW = Resize(img, COL, ROW);
+            bmpGS = Resize(img, COL, ROW);
             picArrayBW = ToBlackWhite(bmpBW);
             picArrayGS = ToGrayScale(bmpGS);
 
@@ -73,14 +73,13 @@ namespace LaserEngravement
             else
                 picSampleImage.Image = bmpGS;
             //bmp.Save(resizedImagePath);
-
             btnEngrave.Enabled = true;
         }
 
         private void btnExit_Click(object sender, EventArgs e)
         {
-
-            myport.Close();
+            if (myport.IsOpen)
+                myport.Close();
 
             this.Close();
 
@@ -91,7 +90,7 @@ namespace LaserEngravement
             int i = 0;
             btnEngrave.Enabled = false;
             btnExit.Enabled = false;
-            myport = new SerialPort();
+            //myport = new SerialPort();
             myport.BaudRate = 19200;
             myport.PortName = "COM3";
             //myport.DataReceived += DataReceivedHandler;
@@ -104,7 +103,7 @@ namespace LaserEngravement
 
         private void sendData()
         {
-            int i = 0;
+            int i = 0, pixelsDoneCount = 0;
             string checkData = "";
 
             lblStatusBox.Text = "Waiting for Arduino to be ready";
@@ -114,6 +113,7 @@ namespace LaserEngravement
 
             if (blackWhite)
             {
+                lblTotal.Text = (picArrayBW.Length*8).ToString();
                 lblStatusBox.Text = "Ready for colour mode";
                 myport.WriteLine("READY FOR COLOUR MODE");
                 waitForConfirmation("READY FOR COLOUR MODE");
@@ -149,8 +149,13 @@ namespace LaserEngravement
                     waitForConfirmation("PIXELS DONE");
                     myport.WriteLine("PIXELS DONE");
                     lblStatusBox.Text = "Pixels done";
-                    i++;
 
+                    //update progress bar
+                    pixelsDoneCount += 8;
+                    lblProg.Text = pixelsDoneCount.ToString();
+                    progStatus.Value = (pixelsDoneCount*100) /(picArrayBW.Length*8);
+
+                    i++;
                     if (i < picArrayBW.Length)
                     {
                         waitForConfirmation("DONE?");
@@ -165,6 +170,7 @@ namespace LaserEngravement
             }
             else
             {
+                lblTotal.Text = (picArrayGS.Length*2).ToString();
                 lblStatusBox.Text = "Ready for colour mode";
                 myport.WriteLine("READY FOR COLOUR MODE");
                 waitForConfirmation("READY FOR COLOUR MODE");
@@ -200,8 +206,13 @@ namespace LaserEngravement
                     waitForConfirmation("PIXELS DONE");
                     myport.WriteLine("PIXELS DONE");
                     lblStatusBox.Text = "Pixels done";
-                    i++;
 
+                    //update progress bar
+                    pixelsDoneCount += 2;
+                    lblProg.Text = pixelsDoneCount.ToString();
+                    progStatus.Value = (pixelsDoneCount*100) / (picArrayGS.Length*2);
+
+                    i++;
                     if (i < picArrayGS.Length)
                     {
                         waitForConfirmation("DONE?");
@@ -213,6 +224,7 @@ namespace LaserEngravement
                 }
 
             }
+            lblStatusBox.Text = "DONE";
             myport.WriteLine("DONE");
         }
 
@@ -236,7 +248,7 @@ namespace LaserEngravement
             byte rgb;
             Color c;
             string rowBits = "", totalBits = "";
-
+     
             for (int y = 0; y < Bmp.Height; y++)
             {
                 for (int x = 0; x < Bmp.Width; x++)
@@ -248,7 +260,8 @@ namespace LaserEngravement
                     if (y % 2 == 0) //even row
                         rowBits += ToBinary(rgb);
                     else
-                        rowBits.Insert(0,ToBinary(rgb));
+                        //rowBits.Insert(0,ToBinary(rgb));
+                        rowBits = ToBinary(rgb) + rowBits;
                 }
                 rowBits = "";
                 totalBits += rowBits;
@@ -308,7 +321,8 @@ namespace LaserEngravement
                         if (y % 2 == 0) //even row
                             rowBits += 1; //set bit as black (left -> right)
                         else //odd row
-                            rowBits.Insert(0,"1"); //set bit as black (left <- right)
+                            //rowBits.Insert(0,"1"); //set bit as black (left <- right)
+                            rowBits = "1" + rowBits;
                     } 
                     else
                     {
@@ -316,7 +330,8 @@ namespace LaserEngravement
                         if (y % 2 == 0) //even row
                             rowBits += 0; //set bit as black (left -> right)
                         else //odd row
-                            rowBits.Insert(0, "0"); //set bit as black (left <- right)
+                            //rowBits.Insert(0, "0"); //set bit as black (left <- right)
+                            rowBits = "0" + rowBits;
                     }
                     Bmp.SetPixel(x, y, Color.FromArgb(rgb, rgb, rgb));
                 }

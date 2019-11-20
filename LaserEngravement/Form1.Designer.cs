@@ -41,6 +41,11 @@
             this.rbGreyScale = new System.Windows.Forms.RadioButton();
             this.lblStatus = new System.Windows.Forms.Label();
             this.lblStatusBox = new System.Windows.Forms.Label();
+            this.progStatus = new System.Windows.Forms.ProgressBar();
+            this.lblProg = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
+            this.lblTotal = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.picSampleImage)).BeginInit();
             this.SuspendLayout();
             // 
@@ -112,7 +117,7 @@
             this.btnEngrave.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Gray;
             this.btnEngrave.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnEngrave.Font = new System.Drawing.Font("Arial Narrow", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnEngrave.Location = new System.Drawing.Point(195, 387);
+            this.btnEngrave.Location = new System.Drawing.Point(195, 421);
             this.btnEngrave.Name = "btnEngrave";
             this.btnEngrave.Size = new System.Drawing.Size(80, 35);
             this.btnEngrave.TabIndex = 6;
@@ -126,7 +131,7 @@
             this.btnExit.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Gray;
             this.btnExit.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnExit.Font = new System.Drawing.Font("Arial Narrow", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnExit.Location = new System.Drawing.Point(357, 387);
+            this.btnExit.Location = new System.Drawing.Point(357, 421);
             this.btnExit.Name = "btnExit";
             this.btnExit.Size = new System.Drawing.Size(80, 35);
             this.btnExit.TabIndex = 7;
@@ -186,12 +191,60 @@
             this.lblStatusBox.Size = new System.Drawing.Size(0, 23);
             this.lblStatusBox.TabIndex = 13;
             // 
+            // progStatus
+            // 
+            this.progStatus.Location = new System.Drawing.Point(195, 371);
+            this.progStatus.Name = "progStatus";
+            this.progStatus.Size = new System.Drawing.Size(246, 17);
+            this.progStatus.TabIndex = 14;
+            // 
+            // lblProg
+            // 
+            this.lblProg.AutoSize = true;
+            this.lblProg.Location = new System.Drawing.Point(225, 391);
+            this.lblProg.Name = "lblProg";
+            this.lblProg.Size = new System.Drawing.Size(16, 17);
+            this.lblProg.TabIndex = 15;
+            this.lblProg.Text = "0";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(304, 391);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(12, 17);
+            this.label1.TabIndex = 15;
+            this.label1.Text = "/";
+            // 
+            // lblTotal
+            // 
+            this.lblTotal.AutoSize = true;
+            this.lblTotal.Location = new System.Drawing.Point(366, 391);
+            this.lblTotal.Name = "lblTotal";
+            this.lblTotal.Size = new System.Drawing.Size(16, 17);
+            this.lblTotal.TabIndex = 16;
+            this.lblTotal.Text = "0";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(444, 391);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(43, 17);
+            this.label2.TabIndex = 17;
+            this.label2.Text = "pixels";
+            // 
             // LaserEngravementProgram
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlLightLight;
-            this.ClientSize = new System.Drawing.Size(582, 466);
+            this.ClientSize = new System.Drawing.Size(582, 483);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.lblTotal);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.lblProg);
+            this.Controls.Add(this.progStatus);
             this.Controls.Add(this.lblStatusBox);
             this.Controls.Add(this.lblStatus);
             this.Controls.Add(this.rbGreyScale);
@@ -231,6 +284,11 @@
         private System.Windows.Forms.RadioButton rbGreyScale;
         private System.Windows.Forms.Label lblStatus;
         private System.Windows.Forms.Label lblStatusBox;
+        private System.Windows.Forms.ProgressBar progStatus;
+        private System.Windows.Forms.Label lblProg;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label lblTotal;
+        private System.Windows.Forms.Label label2;
     }
 }
 
