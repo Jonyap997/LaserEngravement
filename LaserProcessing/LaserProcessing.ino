@@ -1,6 +1,6 @@
 #include <Stepper.h>
 
-const int LASER_PIN = 5;
+const int LASER_PIN = 3;
 const int MOTOR_A_PIN = 3;
 const int MOTOR_B_PIN = 4;
 const int OFF = 0;
@@ -22,7 +22,6 @@ bool receiveDataFlag = true, engraveDataFlag = false, pixelDoneFlag = false, che
 String colourMode,data, dataValidStr, engraveDoneStr, checkSerialConnection, checkReady, checkData, pixelCheckDone, sendNextByte;
 int pixelCount=1, rowCount=1;
 
-String g = "";
 bool gg = false;
 
 Stepper stepperA(STEPS_PER_REVOLUTION, 8, 9, 10, 11);
@@ -60,9 +59,12 @@ void loop() {
         }
         if (checkEngraveFlag)
             checkEngraveDone();
-            
     }
-    
+    else
+    {
+        restoreOriginalState();
+    }
+
 }
 
 /*
@@ -235,6 +237,21 @@ bool isNumeric(String str)
     return true;
 }
 
+void restoreOriginalState()
+{
+    initialDone = false;
+    engraveDone = false;
+    dataValid = false;
+    dataReceived = false;
+    dataValidated = false;
+    dataCheck = false;
+    engraveCheck = false;
+    receiveDataFlag = true;
+    engraveDataFlag = false;
+    pixelDoneFlag = false;
+    checkEngraveFlag = false;
+}
+
 void pixelDoneChecker()
 {
     Serial.println("PIXELS DONE");
@@ -375,4 +392,5 @@ void emergencyStop()
     digitalWrite(LASER_PIN, OFF);
     digitalWrite(MOTOR_A_PIN, OFF);
     digitalWrite(MOTOR_B_PIN, OFF);
+    restoreOriginalState();
 }
