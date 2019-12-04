@@ -1,12 +1,12 @@
 #include <Stepper.h>
 
 const int LASER_PIN = 3;
-const int MOTOR_A_PIN = 3;
-const int MOTOR_B_PIN = 4;
+const int LIMIT_SWITCH = 2;
+const int STOP_PIN = 3;
 const int OFF = 0;
 const int ON = 1;
-const int ROW = 100;
-const int COL = 200;
+const int ROW = 8;
+const int COL = 8;
 const int BW_PIXEL_PER_BYTE = 8;
 const int GS_PIXEL_PER_BYTE = 2;
 const int BW_NUM_OF_ELEMENTS = (ROW * COL) / BW_PIXEL_PER_BYTE;
@@ -14,34 +14,37 @@ const int GS_NUM_OF_ELEMENTS = (ROW * COL) / GS_PIXEL_PER_BYTE;
 const int STEPS_PER_REVOLUTION = 200;
 
 long laserInitialPosition = 0;
-int arrayIndex=0;
 bool initialDone = false, dataValid = false, engraveDone = false, dataReceived = false, dataValidated = false, dataCheck = false, engraveCheck = false;
-bool receiveDataFlag = true, engraveDataFlag = false, pixelDoneFlag = false, checkEngraveFlag = false;
-//int picArrayGS[GS_NUM_OF_ELEMENTS];
-//int picArrayBW[BW_NUM_OF_ELEMENTS];
+bool receiveDataFlag = true, engraveDataFlag = false, pixelDoneFlag = false, checkEngraveFlag = false, atInitial = false;
 String colourMode,data, dataValidStr, engraveDoneStr, checkSerialConnection, checkReady, checkData, pixelCheckDone, sendNextByte;
-int pixelCount=1, rowCount=1;
+int pixelCount=1, rowCount=1, pixelInPacket=0;
+int i =0;
 
-bool gg = false;
-
-Stepper stepperA(STEPS_PER_REVOLUTION, 8, 9, 10, 11);
+Stepper stepperA(STEPS_PER_REVOLUTION, 4, 5, 6, 7);
+Stepper stepperB(STEPS_PER_REVOLUTION, 8, 9, 10, 11);
 
 void setup() {
   // put your setup code here, to run once:
   pinMode(LASER_PIN, OUTPUT);
-  pinMode(MOTOR_A_PIN, OUTPUT);
-  pinMode(MOTOR_B_PIN, OUTPUT);
   digitalWrite(LASER_PIN, OFF);
-  digitalWrite(MOTOR_A_PIN, OFF);
-  digitalWrite(MOTOR_B_PIN, OFF);
-  Serial.begin(19200);
   
+  attachInterrupt(digitalPinToInterrupt(LIMIT_SWITCH), limitSwitchHit, LOW);
+  //attachInterrupt(digitalPinToInterrupt(STOP_PIN), emergencyStop, RISING);
+  stepperA.setSpeed(60);
+  stepperB.setSpeed(60);
+  pixelCount = 1;
+  rowCount = 1;
+  Serial.begin(19200);
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-    
-    if (!initialDone)
+   
+    if (!atInitial)
+    {
+        goToInitial();
+    }
+    else if (!initialDone)
     {
         initialSettings();
     }
@@ -64,7 +67,7 @@ void loop() {
     {
         restoreOriginalState();
     }
-
+    
 }
 
 /*
@@ -161,19 +164,27 @@ void receiveData()
 
 void unpackDataAndEngrave()
 {
-    Serial.println("STARTED ENGRAVING");
+    //Serial.println("STARTED ENGRAVING");
     if(compareString(colourMode, "BW MODE"))
     {
         byte bit=0;
 
         //extract bits to form pixels and engrave bit by bit
-        for(int i=0;i<8;i++)
+        if (pixelInPacket < 8)
         {
-            bit = bitRead(data.toInt(), 7-i);
+            bit = bitRead(data.toInt(), (7 - pixelInPacket));
             engrave(bit);
+            pixelInPacket++;
+            
         }
-        pixelDoneFlag = true;
-    }
+        else
+        {
+            pixelInPacket = 0;
+            pixelDoneFlag = true;
+        }
+        
+        
+    }/*
     else if(compareString(colourMode, "GS MODE"))
     {
         byte bit=0;
@@ -202,7 +213,7 @@ void unpackDataAndEngrave()
         engrave(bit);
 
         pixelDoneFlag = true;
-    }
+    }*/
 }
 
 bool compareString(String compare, String keyword)
@@ -239,6 +250,7 @@ bool isNumeric(String str)
 
 void restoreOriginalState()
 {
+    atInitial = false;
     initialDone = false;
     engraveDone = false;
     dataValid = false;
@@ -250,6 +262,20 @@ void restoreOriginalState()
     engraveDataFlag = false;
     pixelDoneFlag = false;
     checkEngraveFlag = false;
+    pixelCount = 1;
+    rowCount = 1;
+    pixelInPacket = 0;
+    colourMode = "";
+    data = "";
+    dataValidStr = "";
+    engraveDoneStr = "";
+    checkSerialConnection = "";
+    checkReady = "";
+    checkData = "";
+    pixelCheckDone = "";
+    sendNextByte = "";
+    attachInterrupt(digitalPinToInterrupt(LIMIT_SWITCH), limitSwitchHit, LOW);
+
 }
 
 void pixelDoneChecker()
@@ -272,21 +298,20 @@ void engrave(byte bit)
     if(bit > 0)
        turnOnLaser(bit);
     
-    if(pixelCount%199 == 0)
+    if(pixelCount%8 == 0)
     {
-        //down();
+        down();
         rowCount++;
     }
     else if(rowCount%2 == 0)
     {
-        //left();
-        pixelCount++;
+        left();
     }
     else
     {
-        //right();
-        pixelCount++;
+        right();
     }
+    pixelCount++;
 
 }
 
@@ -301,7 +326,7 @@ void turnOnLaser(byte bit)
         analogWrite(LASER_PIN,map(bit,0,7,0,255));
     }
 
-    delay(500);
+    delay(750);
     analogWrite(LASER_PIN,0);
 }
 
@@ -328,7 +353,7 @@ int binaryToInt(String data)
 }
 
 bool checkEngraveDone()
-{
+{    
     if (!engraveCheck)
     {
         Serial.println("DONE?");
@@ -362,26 +387,37 @@ bool checkEngraveDone()
  */
 void right()
 {
-    Serial.println("right");
-    //stepperA(1);
+    stepperA.step(5);
+    delay(500);
 }
 
 void left()
 {
-    Serial.println("left");
-    //stepperA(-1);
+    stepperA.step(-5);
+    delay(500);
 }
 
 void up()
 {
-    Serial.println("up");
-    //stepperB(1);
+    stepperB.step(-5);
+    delay(500);
 }
 
 void down()
 {
-    Serial.println("down");
-    //stepperB(-1);
+    stepperB.step(5);
+    delay(500);
+}
+
+void goToInitial()
+{
+    stepperB.step(-STEPS_PER_REVOLUTION);
+}
+
+void limitSwitchHit()
+{
+    detachInterrupt(digitalPinToInterrupt(LIMIT_SWITCH)); 
+    atInitial = true;
 }
 
 /*
@@ -390,7 +426,5 @@ void down()
 void emergencyStop()
 {
     digitalWrite(LASER_PIN, OFF);
-    digitalWrite(MOTOR_A_PIN, OFF);
-    digitalWrite(MOTOR_B_PIN, OFF);
     restoreOriginalState();
 }

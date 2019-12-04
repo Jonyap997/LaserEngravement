@@ -16,8 +16,8 @@ namespace LaserEngravement
 {
     public partial class LaserEngravementProgram : Form
     {
-        public const int ROW = 50;
-        public const int COL = 100;
+        public const int ROW = 8;
+        public const int COL = 8;
         public const int BW_PIXEL_PER_BYTE = 8; //black & white
         public const int GS_PIXEL_PER_BYTE = 2; //grey scale
         public const int BW_NUM_OF_ELEMENTS = (ROW * COL) / BW_PIXEL_PER_BYTE;
@@ -89,7 +89,6 @@ namespace LaserEngravement
         {
             int i = 0;
             btnEngrave.Enabled = false;
-            btnExit.Enabled = false;
             //myport = new SerialPort();
             myport.BaudRate = 19200;
             myport.PortName = "COM3";
@@ -98,7 +97,6 @@ namespace LaserEngravement
             lblStatusBox.Text = "Connection established";
             sendData();
 
-            btnExit.Enabled = true;
         }
 
         private void sendData()
@@ -149,13 +147,14 @@ namespace LaserEngravement
                     waitForConfirmation("PIXELS DONE");
                     myport.WriteLine("PIXELS DONE");
                     lblStatusBox.Text = "Pixels done";
-
+                    
                     //update progress bar
                     pixelsDoneCount += 8;
                     lblProg.Text = pixelsDoneCount.ToString();
                     progStatus.Value = (pixelsDoneCount*100) /(picArrayBW.Length*8);
 
                     i++;
+                    
                     if (i < picArrayBW.Length)
                     {
                         waitForConfirmation("DONE?");
@@ -224,6 +223,7 @@ namespace LaserEngravement
                 }
 
             }
+            waitForConfirmation("DONE?");
             lblStatusBox.Text = "DONE";
             myport.WriteLine("DONE");
         }
