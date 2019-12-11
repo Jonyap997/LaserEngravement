@@ -1,8 +1,8 @@
 #include <Stepper.h>
-
+ 
 const int LASER_PIN = 3;
 const int LIMIT_SWITCH = 2;
-const int STOP_PIN = 3;
+//const int STOP_PIN = 3;
 const int OFF = 0;
 const int ON = 1;
 const int ROW = 8;
@@ -13,12 +13,10 @@ const int BW_NUM_OF_ELEMENTS = (ROW * COL) / BW_PIXEL_PER_BYTE;
 const int GS_NUM_OF_ELEMENTS = (ROW * COL) / GS_PIXEL_PER_BYTE;
 const int STEPS_PER_REVOLUTION = 200;
 
-long laserInitialPosition = 0;
 bool initialDone = false, dataValid = false, engraveDone = false, dataReceived = false, dataValidated = false, dataCheck = false, engraveCheck = false;
 bool receiveDataFlag = true, engraveDataFlag = false, pixelDoneFlag = false, checkEngraveFlag = false, atInitial = false;
 String colourMode,data, dataValidStr, engraveDoneStr, checkSerialConnection, checkReady, checkData, pixelCheckDone, sendNextByte;
 int pixelCount=1, rowCount=1, pixelInPacket=0;
-int i =0;
 
 Stepper stepperA(STEPS_PER_REVOLUTION, 4, 5, 6, 7);
 Stepper stepperB(STEPS_PER_REVOLUTION, 8, 9, 10, 11);
@@ -34,7 +32,7 @@ void setup() {
   stepperB.setSpeed(60);
   pixelCount = 1;
   rowCount = 1;
-  Serial.begin(19200);
+  Serial.begin(9600);
 }
 
 void loop() {
@@ -298,7 +296,7 @@ void engrave(byte bit)
     if(bit > 0)
        turnOnLaser(bit);
     
-    if(pixelCount%8 == 0)
+    if(pixelCount%COL == 0)
     {
         down();
         rowCount++;
@@ -387,25 +385,25 @@ bool checkEngraveDone()
  */
 void right()
 {
-    stepperA.step(5);
+    stepperA.step(3);
     delay(500);
 }
 
 void left()
 {
-    stepperA.step(-5);
+    stepperA.step(-3);
     delay(500);
 }
 
 void up()
 {
-    stepperB.step(-5);
+    stepperB.step(-3);
     delay(500);
 }
 
 void down()
 {
-    stepperB.step(5);
+    stepperB.step(3);
     delay(500);
 }
 

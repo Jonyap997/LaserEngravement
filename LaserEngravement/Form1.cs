@@ -90,8 +90,8 @@ namespace LaserEngravement
             int i = 0;
             btnEngrave.Enabled = false;
             //myport = new SerialPort();
-            myport.BaudRate = 19200;
-            myport.PortName = "COM3";
+            myport.BaudRate = 9600;
+            myport.PortName = "COM4";
             //myport.DataReceived += DataReceivedHandler;
             myport.Open();
             lblStatusBox.Text = "Connection established";
